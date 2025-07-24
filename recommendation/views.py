@@ -16,6 +16,7 @@ from django.core.exceptions import PermissionDenied
 
 User = get_user_model()
 class RecommendationViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = Recommendation.objects.filter(is_deleted = False)
     serializer_class = RecommendationSerializer
 
@@ -39,7 +40,6 @@ class RecommendationViewSet(viewsets.ModelViewSet):
             # 🔍 Predict top 3 crops
             top3 = predict_top_crops(features)  # [('mango', 0.32), ('pomegranate', 0.28), ('coffee', 0.1)]
 
-            print("🔍 Predicted Top 3 Crops:")
             for name, conf in top3:
                 print(f" - {name}: {round(conf * 100, 2)}% confidence")
 
@@ -104,17 +104,18 @@ class RecommendationViewSet(viewsets.ModelViewSet):
     
      # confirming_authentication
     def get_permissions(self):
-          if self.action == ['create']:
-                return [IsAuthenticated()]
-          return[IsAuthenticated()]
+        if self.action in ['create', 'my-recommendations', 'destroy']:
+            return [IsAuthenticated()]
+        return super().get_permissions()
+
     
 
 
     def list(self, request, *args, **kwargs):
         if request.user.role != 'admin':
             raise PermissionDenied("Only admins can view all recommendations.")
-        
         return super().list(request, *args, **kwargs)
+
 
     
 

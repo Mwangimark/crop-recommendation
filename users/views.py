@@ -14,6 +14,7 @@ from rest_framework.decorators import api_view
 from .serializers import ChangePasswordSerializer
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from .permission import IsAdmin
+from django.contrib.auth import get_user_model
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -75,4 +76,11 @@ def verify_email(request,uidb64,token):
         
     else:
             return HttpResponse('Invalid or expired token',status = 400)
+    
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import MyTokenObtainPairSerializer
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+
        

@@ -4,11 +4,24 @@ from recommendationcrop.models import RecommendationCrop
 from recommendationcrop.serializers import RecommendationCropSerializer
 from crops.models import Crop  # Import your Crops model
 
+# class RecommendationSerializer(serializers.ModelSerializer):
+#     recommended_crops = RecommendationCropSerializer(many=True,read_only = True)
+
+#     class Meta:
+#         model = Recommendation
+#         fields = '__all__'
+
+
 class RecommendationSerializer(serializers.ModelSerializer):
-    recommended_crops = RecommendationCropSerializer(many=True,read_only = True)
+    predicted_crops = serializers.SerializerMethodField()
 
     class Meta:
         model = Recommendation
         fields = '__all__'
 
-
+    def get_predicted_crops(self, obj):
+        crops = RecommendationCrop.objects.filter(recommendation=obj)
+        return [
+            {"name": crop.crop.name, "confidence": round(crop.confidence, 2)}
+            for crop in crops
+        ]
