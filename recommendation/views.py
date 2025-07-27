@@ -104,9 +104,10 @@ class RecommendationViewSet(viewsets.ModelViewSet):
     
      # confirming_authentication
     def get_permissions(self):
-        if self.action in ['create', 'my-recommendations', 'destroy']:
+        if self.action in ['create', 'recommendations_by_user', 'destroy']:
             return [IsAuthenticated()]
         return super().get_permissions()
+
 
     
 
