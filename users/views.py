@@ -9,12 +9,15 @@ from django.contrib.auth.hashers import check_password,make_password
 from .utils import email_verification_token
 from django.utils.http import urlsafe_base64_decode
 from django.shortcuts import redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view
 from .serializers import ChangePasswordSerializer
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from .permission import IsAdmin
 from django.contrib.auth import get_user_model
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from rest_framework.views import APIView
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -83,4 +86,28 @@ from .serializers import MyTokenObtainPairSerializer
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
-       
+class ContactUs(APIView):
+    permission_classes = [AllowAny] 
+    
+    def post(self, request):
+        message = request.data.get('message')
+        first_name = request.data.get('first_name')
+        last_name = request.data.get('last_name')
+        email = request.data.get('email')
+        phone = request.data.get('phone')
+        address = request.data.get('address')
+        city = request.data.get('city')
+
+        full_name = f"{first_name} {last_name}"
+
+        try:
+            scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+            creds = ServiceAccountCredentials.from_json_keyfile_name("croprecommendation-468312-c1ae4aa15926.json", scope)
+            client = gspread.authorize(creds)
+
+            sheet = client.open("contactusdata").sheet1
+            sheet.append_row([full_name, email, phone, address, city, message])
+
+            return Response({'message': 'Thank you for contacting us!'}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
