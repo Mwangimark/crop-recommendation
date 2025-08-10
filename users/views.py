@@ -23,6 +23,11 @@ from rest_framework.views import APIView
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.filter(is_deleted=False)
     serializer_class = UserSerializer
+
+    @action(detail=False, methods=['get'])
+    def me(self, request):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
     
 
     def destroy(self, request, *args, **kwargs):
@@ -111,3 +116,11 @@ class ContactUs(APIView):
             return Response({'message': 'Thank you for contacting us!'}, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# class UserProfileView(APIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request):
+#         serializer = UserSerializer(request.user)
+#         return Response(serializer.data)

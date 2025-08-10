@@ -6,6 +6,8 @@ from django.core.files import File
 from django.db import models
 from django.utils.text import slugify
 from uuid import uuid4
+from django.core.files.base import ContentFile
+from django.utils.text import slugify
 
 def crop_image_path(instance, filename):
     ext = filename.split('.')[-1]
@@ -18,6 +20,10 @@ class Crop(models.Model):
     image = models.ImageField(upload_to=crop_image_path, blank=True, null=True)
     image_url = models.URLField(blank=True, null=True, help_text="Paste image URL here if not uploading manually.")
     description = models.TextField(blank=True, null=True)
+    detailed_description = models.TextField(blank=True, null=True)
+    health_contents = models.TextField(blank=True, null=True)
+    conditions_of_growth = models.TextField(blank=True, null=True)
+    link_to_wikipedia = models.URLField(blank=True, null=True, help_text="Link to Wikipedia page for this crop.")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -40,3 +46,30 @@ class Crop(models.Model):
             except Exception as e:
                 print(f"❌ Failed to fetch image from URL: {e}")
         super().save(*args, **kwargs)
+
+
+# nutrients model
+class Nutrients(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    intro = models.CharField(max_length=500, blank=True)
+    description = models.TextField(blank=True)
+    links = models.TextField(blank=True, help_text="Comma-separated or JSON list of links")
+
+    image_url = models.URLField(blank=True, help_text="URL of the image to download")
+    photo = models.ImageField(upload_to='nutrients/', blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        # If image_url is given but no local photo yet, download it
+        if self.image_url and not self.photo:
+            try:
+                response = requests.get(self.image_url, timeout=10)
+                if response.status_code == 200:
+                    filename = f"{slugify(self.name)}.jpg"
+                    self.photo.save(filename, ContentFile(response.content), save=False)
+            except Exception as e:
+                print(f"Image download failed: {e}")
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
