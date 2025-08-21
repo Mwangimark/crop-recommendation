@@ -1,1 +1,1 @@
-web: gunicorn CropRecommendation.wsgi
+web: gunicorn CropRecommendation.wsgi:application --log-file -

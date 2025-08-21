@@ -18,6 +18,8 @@ from django.contrib.auth import get_user_model
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from rest_framework.views import APIView
+import json
+import os
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -106,14 +108,25 @@ class ContactUs(APIView):
         full_name = f"{first_name} {last_name}"
 
         try:
-            scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-            creds = ServiceAccountCredentials.from_json_keyfile_name("croprecommendation-468312-c1ae4aa15926.json", scope)
+            creds_json = os.getenv("GOOGLE_CREDENTIALS")
+            if not creds_json:
+                return Response({'error': 'Google credentials not found in environment'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            creds_dict = json.loads(creds_json)
+            creds_dict["private_key"] = creds_dict["private_key"].replace("\\n", "\n")  # Fix key formatting
+
+            scope = [
+                'https://spreadsheets.google.com/feeds',
+                'https://www.googleapis.com/auth/drive'
+            ]
+            creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
             client = gspread.authorize(creds)
 
             sheet = client.open("contactusdata").sheet1
             sheet.append_row([full_name, email, phone, address, city, message])
 
             return Response({'message': 'Thank you for contacting us!'}, status=status.HTTP_201_CREATED)
+
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
