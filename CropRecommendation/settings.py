@@ -88,16 +88,32 @@ WSGI_APPLICATION = 'CropRecommendation.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': config('DB_NAME') ,
-        'USER': config('DB_USER') ,
-        'PASSWORD':config('DB_PASSWORD') ,
-        'HOST':config('DB_HOST') ,
-        'PORT':config('DB_PORT') ,
+ENVIRONMENT = config("ENVIRONMENT", default="local")
+print(ENVIRONMENT)
+
+if ENVIRONMENT == "production":
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('SUPABASE_DB_NAME'),
+            'USER': config('SUPABASE_DB_USER'),
+            'PASSWORD': config('SUPABASE_DB_PASSWORD'),
+            'HOST': config('SUPABASE_DB_HOST'),
+            'PORT': config('SUPABASE_DB_PORT', cast=int),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': config('DB_NAME'),
+            'USER': config('DB_USER'),
+            'PASSWORD': config('DB_PASSWORD'),
+            'HOST': config('DB_HOST'),
+            'PORT': config('DB_PORT'),
+        }
+    }
+
 
 
 # Password validation
