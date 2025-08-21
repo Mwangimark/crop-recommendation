@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-t9*lw+rp@b@s4a$k#k=zek&mpn62%racbww5k9n411d1(efr2a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
 
 ALLOWED_HOSTS = []
 
@@ -92,6 +92,7 @@ ENVIRONMENT = config("ENVIRONMENT", default="local")
 print(ENVIRONMENT)
 
 if ENVIRONMENT == "production":
+    DEBUG = False
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -103,6 +104,7 @@ if ENVIRONMENT == "production":
         }
     }
 else:
+    DEBUG = True
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
