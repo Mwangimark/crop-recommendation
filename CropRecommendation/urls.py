@@ -26,6 +26,7 @@ urlpatterns = [
     path('api/',include('message.urls')),
     path('api/',include('recommendation.urls')),
     path('api/',include('recommendationcrop.urls')),
+    path("api/", include("chatbot.urls")),
 ]
 
 if settings.DEBUG:

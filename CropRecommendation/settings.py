@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-t9*lw+rp@b@s4a$k#k=zek&mpn62%racbww5k9n411d1(efr2a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'recommendation',
     'recommendationcrop',
     'users',
+    'chatbot',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
